@@ -394,6 +394,43 @@ line-height: 1.7;
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.macro-pill.cal span {
+  color: var(--accent);
+}
+
+.macro-pill.pro span {
+  color: #f7a85e;
+}
+
+.macro-pill.carb span {
+  color: var(--accent2);
+}
+
+.macro-pill.fat span {
+  color: #d97ef7;
+}
+
+.day-btn {
+  background: #1f1f24;
+  border: 1px solid #333;
+  color: var(--accent2);
+  box-shadow: 0 0 0 transparent;
+}
+
+.day-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(200, 245, 90, 0.28);
+}
+
+.day-btn:hover {
+  background: #2b2b30;
+  color: var(--accent);
+  border-color: var(--accent);
+}
 </style>
 
 </head>
