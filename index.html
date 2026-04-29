@@ -311,6 +311,71 @@ line-height: 1.7;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
+
+.year-tracker {
+  max-width: 1100px;
+  margin: 36px auto 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.year-tracker h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--accent);
+  font-size: 34px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.month-block {
+  margin-bottom: 18px;
+}
+
+.month-title {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 5px;
+}
+
+.day-square {
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: #2a2a2a;
+  border: 1px solid #333;
+}
+
+.day-square.future {
+  background: #1a1a1a;
+  opacity: 0.45;
+}
+
+.day-square.none {
+  background: #4a1717;
+}
+
+.day-square.partial {
+  background: #5a3b12;
+}
+
+.day-square.complete {
+  background: #355015;
+  border-color: var(--accent);
+}
+
+.day-square.today {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 </style>
 
 </head>
@@ -1197,10 +1262,18 @@ line-height: 1.7;
 </div>
 
 <script>
+  function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   function showDay(index) {
     document.querySelectorAll('.day-content').forEach((el, i) => {
       el.classList.toggle('active', i === index);
     });
+
     document.querySelectorAll('.day-btn').forEach((btn, i) => {
       btn.classList.toggle('active', i === index);
     });
@@ -1210,17 +1283,28 @@ line-height: 1.7;
   }
 
   const today = new Date();
+  const currentYear = today.getFullYear();
   const todayIndex = (today.getDay() + 6) % 7;
-  const todayDate = today.toISOString().split('T')[0];
+  const todayDate = getLocalDateString(today);
 
-  const savedDate = localStorage.getItem('mealPlanDate');
-
-  if (savedDate !== todayDate) {
+  const savedYear = localStorage.getItem('mealPlanYear');
+  if (savedYear !== String(currentYear)) {
     Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('meal-')) {
+      if (
+        key.startsWith('meal-') ||
+        key.startsWith('mealHistory-') ||
+        key === 'mealPlanDate' ||
+        key === 'mealPlanYear'
+      ) {
         localStorage.removeItem(key);
       }
     });
+
+    localStorage.setItem('mealPlanYear', String(currentYear));
+  }
+
+  const savedDate = localStorage.getItem('mealPlanDate');
+  if (savedDate !== todayDate) {
     localStorage.setItem('mealPlanDate', todayDate);
   }
 
@@ -1247,6 +1331,8 @@ line-height: 1.7;
       localStorage.setItem(id, checkbox.checked);
       updateProgress();
       highlightCurrentMeal();
+      saveTodayHistory();
+      buildYearTracker();
     });
 
     card.querySelector('.meal-header').appendChild(checkbox);
@@ -1280,19 +1366,96 @@ line-height: 1.7;
     }
   }
 
-  showDay(todayIndex);
-  
-  function forceUpdate() {
-  window.location.href = window.location.pathname + '?v=' + Date.now();
-}
+  function saveTodayHistory() {
+    const cards = getActiveMealCards();
+    const checked = cards.filter(card => card.querySelector('.meal-check')?.checked).length;
+    const total = cards.length;
 
-setInterval(() => {
-  const nowDate = new Date().toISOString().split('T')[0];
+    let status = 'none';
 
-  if (nowDate !== localStorage.getItem('mealPlanDate')) {
-    location.reload();
+    if (checked === total && total > 0) {
+      status = 'complete';
+    } else if (checked > 0) {
+      status = 'partial';
+    }
+
+    localStorage.setItem(`mealHistory-${todayDate}`, status);
   }
-}, 60000);
+
+  function buildYearTracker() {
+    let tracker = document.querySelector('.year-tracker');
+
+    if (!tracker) {
+      tracker = document.createElement('div');
+      tracker.className = 'year-tracker';
+      document.body.appendChild(tracker);
+    }
+
+    tracker.innerHTML = `<h2>${currentYear} Tracker</h2>`;
+
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const startMonth = today.getMonth();
+
+    for (let month = startMonth; month < 12; month++) {
+      const monthBlock = document.createElement('div');
+      monthBlock.className = 'month-block';
+
+      const title = document.createElement('div');
+      title.className = 'month-title';
+      title.textContent = monthNames[month];
+
+      const grid = document.createElement('div');
+      grid.className = 'days-grid';
+
+      const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, month, day);
+        const dateString = getLocalDateString(date);
+
+        const square = document.createElement('div');
+        square.className = 'day-square';
+
+        if (dateString === todayDate) {
+          square.classList.add('today');
+        }
+
+        if (date > today) {
+          square.classList.add('future');
+        } else {
+          const status = localStorage.getItem(`mealHistory-${dateString}`) || 'none';
+          square.classList.add(status);
+        }
+
+        square.title = dateString;
+        grid.appendChild(square);
+      }
+
+      monthBlock.appendChild(title);
+      monthBlock.appendChild(grid);
+      tracker.appendChild(monthBlock);
+    }
+  }
+
+  function forceUpdate() {
+    window.location.href = window.location.pathname + '?v=' + Date.now();
+  }
+
+  setInterval(() => {
+    const nowDate = getLocalDateString(new Date());
+
+    if (nowDate !== localStorage.getItem('mealPlanDate')) {
+      location.reload();
+    }
+  }, 60000);
+
+  showDay(todayIndex);
+  saveTodayHistory();
+  buildYearTracker();
 </script>
 
 </body>
