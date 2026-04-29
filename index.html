@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recomp Meal Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --card: #161616;
+    --accent: #c8f55a;
+    --accent2: #7ed4f7;
+    --text: #f0f0f0;
+    --muted: #888;
+    --border: #2a2a2a;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+min-height: 100vh;
+padding: 32px 20px 60px;
+}
+
+header { text-align: center; margin-bottom: 40px; }
+
+header h1 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(52px, 12vw, 96px);
+letter-spacing: 4px;
+line-height: 0.9;
+color: var(–accent);
+}
+
+header p {
+color: var(–muted);
+font-size: 13px;
+letter-spacing: 3px;
+text-transform: uppercase;
+margin-top: 10px;
+}
+
+.macros-bar {
+display: flex;
+justify-content: center;
+gap: 12px;
+margin-bottom: 32px;
+flex-wrap: wrap;
+}
+
+.macro-pill {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 100px;
+padding: 10px 22px;
+font-size: 13px;
+font-weight: 500;
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+
+.macro-pill span {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 20px;
+display: block;
+letter-spacing: 2px;
+}
+
+.macro-pill.cal span { color: var(–accent); }
+.macro-pill.pro span { color: #f7a85e; }
+.macro-pill.carb span { color: var(–accent2); }
+.macro-pill.fat span { color: #d97ef7; }
+
+.shopping-strip {
+max-width: 1100px;
+margin: 0 auto 36px;
+background: #111;
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 14px 20px;
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+align-items: center;
+}
+
+.shopping-strip .label {
+font-size: 10px;
+text-transform: uppercase;
+letter-spacing: 2px;
+color: var(–muted);
+margin-right: 4px;
+width: 100%;
+}
+
+.shop-tag {
+background: #1a1a1a;
+border: 1px solid #333;
+border-radius: 6px;
+padding: 4px 12px;
+font-size: 12px;
+color: #ddd;
+font-weight: 500;
+}
+
+.day-nav {
+display: flex;
+justify-content: center;
+gap: 6px;
+margin-bottom: 32px;
+flex-wrap: wrap;
+}
+
+.day-btn {
+background: var(–card);
+border: 1px solid var(–border);
+color: var(–muted);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 12px;
+letter-spacing: 2px;
+text-transform: uppercase;
+padding: 8px 16px;
+border-radius: 6px;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.day-btn:hover, .day-btn.active {
+background: var(–accent);
+color: #000;
+border-color: var(–accent);
+font-weight: 600;
+}
+
+.day-content { display: none; }
+.day-content.active { display: block; }
+
+.meals-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 16px;
+max-width: 1100px;
+margin: 0 auto;
+}
+
+.meal-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 16px;
+overflow: hidden;
+transition: transform 0.2s, border-color 0.2s;
+}
+
+.meal-card:hover {
+transform: translateY(-3px);
+border-color: #333;
+}
+
+.meal-header {
+padding: 14px 18px 10px;
+border-bottom: 1px solid var(–border);
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.meal-number {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 28px;
+color: var(–accent);
+line-height: 1;
+min-width: 28px;
+}
+
+.meal-label {
+font-size: 10px;
+text-transform: uppercase;
+letter-spacing: 2px;
+color: var(–muted);
+}
+
+.meal-name {
+font-size: 15px;
+font-weight: 600;
+line-height: 1.2;
+}
+
+.meal-body { padding: 14px 18px; }
+
+.ingredients {
+list-style: none;
+margin-bottom: 14px;
+}
+
+.ingredients li {
+font-size: 13px;
+color: #ccc;
+padding: 4px 0;
+border-bottom: 1px solid #1f1f1f;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.ingredients li:last-child { border-bottom: none; }
+
+.ing-amount {
+color: var(–muted);
+font-size: 12px;
+white-space: nowrap;
+margin-left: 8px;
+}
+
+.meal-macros {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+}
+
+.tag {
+font-size: 11px;
+padding: 3px 9px;
+border-radius: 100px;
+font-weight: 500;
+}
+
+.tag-cal { background: #1e2a10; color: var(–accent); }
+.tag-pro { background: #2a1e10; color: #f7a85e; }
+.tag-carb { background: #102028; color: var(–accent2); }
+.tag-fat { background: #20102a; color: #d97ef7; }
+
+.note {
+max-width: 1100px;
+margin: 28px auto 0;
+background: var(–card);
+border: 1px solid var(–border);
+border-left: 3px solid var(–accent);
+border-radius: 10px;
+padding: 14px 18px;
+font-size: 13px;
+color: var(–muted);
+line-height: 1.7;
+}
+
+.note strong { color: var(–text); }
+</style>
+
+</head>
+<body>
+
+<header>
+  <h1>SHRED<br>PROTOCOL</h1>
+  <p>High Protein · Body Recomp · 7-Day Plan · Belgium Edition</p>
+</header>
+
+<div class="macros-bar">
+  <div class="macro-pill cal"><span>2,400–2,500</span>Calories / Day</div>
+  <div class="macro-pill pro"><span>~200–220g</span>Protein</div>
+  <div class="macro-pill carb"><span>~200–220g</span>Carbs</div>
+  <div class="macro-pill fat"><span>~65–75g</span>Fats</div>
+</div>
+
+<div class="shopping-strip">
+  <span class="label">Weekly shopping list — proteins</span>
+  <span class="shop-tag">🍗 Chicken breast</span>
+  <span class="shop-tag">🥩 Lean ground beef (5% vet)</span>
+  <span class="shop-tag">🐟 Salmon fillet</span>
+  <span class="shop-tag">🐟 Canned tuna (in water)</span>
+  <span class="shop-tag">🦐 Shrimp (gepeld)</span>
+  <span class="shop-tag">🥚 Whole eggs</span>
+  <span class="shop-tag">🥛 Greek yogurt 0%</span>
+  <span class="shop-tag">🥤 Whey / Casein protein</span>
+</div>
+
+<div class="day-nav">
+  <button class="day-btn active" onclick="showDay(0)">Mon</button>
+  <button class="day-btn" onclick="showDay(1)">Tue</button>
+  <button class="day-btn" onclick="showDay(2)">Wed</button>
+  <button class="day-btn" onclick="showDay(3)">Thu</button>
+  <button class="day-btn" onclick="showDay(4)">Fri</button>
+  <button class="day-btn" onclick="showDay(5)">Sat</button>
+  <button class="day-btn" onclick="showDay(6)">Sun</button>
+</div>
+
+<!-- MONDAY -->
+
+<div class="day-content active" id="day-0">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 7u</div>
+          <div class="meal-name">Greek Yogurt Power Bowl</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">400g</span></li>
+          <li>Havermout (droog) <span class="ing-amount">50g</span></li>
+          <li>Blauwe bessen <span class="ing-amount">80g</span></li>
+          <li>Honing <span class="ing-amount">5g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~430 kcal</span>
+          <span class="tag tag-pro">40g P</span>
+          <span class="tag tag-carb">54g K</span>
+          <span class="tag tag-fat">5g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 12u</div>
+          <div class="meal-name">Chicken & Sweet Potato Bowl</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">230g</span></li>
+          <li>Zoete aardappel (gebakken) <span class="ing-amount">200g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Olijfolie <span class="ing-amount">5ml</span></li>
+          <li>Zout, knoflookpoeder, paprika <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~620 kcal</span>
+          <span class="tag tag-pro">58g P</span>
+          <span class="tag tag-carb">50g K</span>
+          <span class="tag tag-fat">10g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 15u</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">250g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">100g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~190 kcal</span>
+          <span class="tag tag-pro">24g P</span>
+          <span class="tag tag-carb">20g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 18u30</div>
+          <div class="meal-name">Gehakt & Groene Boontjes</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Mager rundergehakt (5% vet) <span class="ing-amount">230g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">150g</span></li>
+          <li>Witte of bruine rijst (gekookt) <span class="ing-amount">150g</span></li>
+          <li>Olijfolie <span class="ing-amount">5ml</span></li>
+          <li>Knoflook, komijn, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~650 kcal</span>
+          <span class="tag tag-pro">56g P</span>
+          <span class="tag tag-carb">52g K</span>
+          <span class="tag tag-fat">16g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Protein Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Whey of casein eiwit <span class="ing-amount">45g (1,5 scoops)</span></li>
+          <li>Water <span class="ing-amount">350ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~200 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">6g K</span>
+          <span class="tag tag-fat">3g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Maandag totaal:</strong> ~2,090 kcal · 220g P · 182g K · 35g V &nbsp;|&nbsp; Voeg 100g extra rijst of een extra zoete aardappel toe om op 2,400 kcal te komen.</div>
+</div>
+
+<!-- TUESDAY -->
+
+<div class="day-content" id="day-1">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 7u</div>
+          <div class="meal-name">Roerei & Toast</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Hele eieren <span class="ing-amount">4 stuks (~200g)</span></li>
+          <li>Volkoren boterham <span class="ing-amount">2 sneden (~70g)</span></li>
+          <li>Bakspray of weinig boter <span class="ing-amount">minimaal</span></li>
+          <li>Zout & peper <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~460 kcal</span>
+          <span class="tag tag-pro">30g P</span>
+          <span class="tag tag-carb">36g K</span>
+          <span class="tag tag-fat">18g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 12u</div>
+          <div class="meal-name">Tonijn & Aardappelbowl</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Tonijn in water (blik) <span class="ing-amount">2 blikken (~280g uitgelekt)</span></li>
+          <li>Gekookte aardappelen (blokjes) <span class="ing-amount">250g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Olijfolie & citroensap <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~590 kcal</span>
+          <span class="tag tag-pro">62g P</span>
+          <span class="tag tag-carb">50g K</span>
+          <span class="tag tag-fat">8g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 15u</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">300g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">100g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~210 kcal</span>
+          <span class="tag tag-pro">28g P</span>
+          <span class="tag tag-carb">22g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 18u30</div>
+          <div class="meal-name">Gebakken Tilapia & Zoete Aardappel</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Tilapia filets <span class="ing-amount">280g</span></li>
+          <li>Zoete aardappel (gebakken) <span class="ing-amount">220g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">150g</span></li>
+          <li>Olijfolie, citroen, kruiden <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~620 kcal</span>
+          <span class="tag tag-pro">56g P</span>
+          <span class="tag tag-carb">58g K</span>
+          <span class="tag tag-fat">10g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Casein Protein Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Casein eiwit <span class="ing-amount">45g (1,5 scoops)</span></li>
+          <li>Water <span class="ing-amount">350ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~200 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">6g K</span>
+          <span class="tag tag-fat">3g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Dinsdag totaal:</strong> ~2,080 kcal · 218g P · 172g K · 40g V &nbsp;|&nbsp; Eieren zijn iets vetter — dat is normaal. Voeg 100g extra aardappelen toe bij de lunch om de calorieën aan te vullen.</div>
+</div>
+
+<!-- WEDNESDAY -->
+
+<div class="day-content" id="day-2">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 7u</div>
+          <div class="meal-name">Protein Havermout</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Havermout (droog) <span class="ing-amount">80g</span></li>
+          <li>Whey eiwit (erdoor gemengd) <span class="ing-amount">30g (1 scoop)</span></li>
+          <li>Banaan <span class="ing-amount">1 stuk (~120g)</span></li>
+          <li>Kaneel <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~490 kcal</span>
+          <span class="tag tag-pro">36g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">6g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 12u</div>
+          <div class="meal-name">Kip & Zwarte Bonen Bowl</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">230g</span></li>
+          <li>Zwarte bonen (blik, gespoeld) <span class="ing-amount">100g</span></li>
+          <li>Bruine rijst (gekookt) <span class="ing-amount">150g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Limoen, komijn, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~670 kcal</span>
+          <span class="tag tag-pro">62g P</span>
+          <span class="tag tag-carb">68g K</span>
+          <span class="tag tag-fat">10g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 15u</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">250g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">100g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~190 kcal</span>
+          <span class="tag tag-pro">24g P</span>
+          <span class="tag tag-carb">20g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 18u30</div>
+          <div class="meal-name">Garnalen Roerbak & Aardappelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Garnalen (gepeld) <span class="ing-amount">280g</span></li>
+          <li>Kleine gekookte aardappelen <span class="ing-amount">250g</span></li>
+          <li>Groene boontjes <span class="ing-amount">150g</span></li>
+          <li>Wortelen (gesneden) <span class="ing-amount">80g</span></li>
+          <li>Olijfolie, knoflook, soja (weinig zout) <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~560 kcal</span>
+          <span class="tag tag-pro">52g P</span>
+          <span class="tag tag-carb">56g K</span>
+          <span class="tag tag-fat">10g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Protein Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Whey eiwit <span class="ing-amount">45g (1,5 scoops)</span></li>
+          <li>Water <span class="ing-amount">350ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~200 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">6g K</span>
+          <span class="tag tag-fat">3g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Woensdag totaal:</strong> ~2,110 kcal · 216g P · 222g K · 30g V &nbsp;|&nbsp; Hoge koolhydratendag — ideaal als trainingsdag. Voeg 30g extra havermout toe 's morgens voor meer calorieën.</div>
+</div>
+
+<!-- THURSDAY -->
+
+<div class="day-content" id="day-3">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 7u</div>
+          <div class="meal-name">Roerei & Havermout</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Hele eieren <span class="ing-amount">3 stuks (~150g)</span></li>
+          <li>Havermout (droog) <span class="ing-amount">60g</span></li>
+          <li>Aardbeien <span class="ing-amount">100g</span></li>
+          <li>Bakspray <span class="ing-amount">minimaal</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~450 kcal</span>
+          <span class="tag tag-pro">28g P</span>
+          <span class="tag tag-carb">48g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 12u</div>
+          <div class="meal-name">Gehakt & Gepureerde Zoete Aardappel</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Mager rundergehakt (5% vet) <span class="ing-amount">230g</span></li>
+          <li>Zoete aardappel (gepureerd) <span class="ing-amount">220g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Olijfolie <span class="ing-amount">5ml</span></li>
+          <li>Zout, knoflook, paprika <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~640 kcal</span>
+          <span class="tag tag-pro">54g P</span>
+          <span class="tag tag-carb">56g K</span>
+          <span class="tag tag-fat">18g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 15u</div>
+          <div class="meal-name">Protein Shake & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Whey eiwit <span class="ing-amount">30g (1 scoop)</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">100g</span></li>
+          <li>Water <span class="ing-amount">300ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~175 kcal</span>
+          <span class="tag tag-pro">28g P</span>
+          <span class="tag tag-carb">14g K</span>
+          <span class="tag tag-fat">2g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 18u30</div>
+          <div class="meal-name">Kip & Witte Bonen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gebakken) <span class="ing-amount">230g</span></li>
+          <li>Witte bonen (blik, gespoeld) <span class="ing-amount">120g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">150g</span></li>
+          <li>Olijfolie, rozemarijn, knoflook <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~580 kcal</span>
+          <span class="tag tag-pro">58g P</span>
+          <span class="tag tag-carb">38g K</span>
+          <span class="tag tag-fat">10g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Greek Yogurt (Nacht Eiwit)</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">300g</span></li>
+          <li>Honing <span class="ing-amount">5g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~210 kcal</span>
+          <span class="tag tag-pro">28g P</span>
+          <span class="tag tag-carb">26g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Donderdag totaal:</strong> ~2,055 kcal · 196g P · 182g K · 45g V &nbsp;|&nbsp; Voeg 150g gekookte rijst toe bij de lunch om calorieën en koolhydraten aan te vullen.</div>
+</div>
+
+<!-- FRIDAY -->
+
+<div class="day-content" id="day-4">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 7u</div>
+          <div class="meal-name">Roerei & Zoete Aardappel Hash</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Hele eieren <span class="ing-amount">4 stuks (~200g)</span></li>
+          <li>Zoete aardappel (blokjes, geroosterd) <span class="ing-amount">150g</span></li>
+          <li>Broccoliroosjes <span class="ing-amount">80g</span></li>
+          <li>Bakspray, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~470 kcal</span>
+          <span class="tag tag-pro">30g P</span>
+          <span class="tag tag-carb">42g K</span>
+          <span class="tag tag-fat">18g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 12u</div>
+          <div class="meal-name">Kip & Rijst Bowl</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">230g</span></li>
+          <li>Witte rijst (gekookt) <span class="ing-amount">200g</span></li>
+          <li>Gestoomde wortelen <span class="ing-amount">100g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">100g</span></li>
+          <li>Sojasaus (weinig zout) <span class="ing-amount">15ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~660 kcal</span>
+          <span class="tag tag-pro">58g P</span>
+          <span class="tag tag-carb">74g K</span>
+          <span class="tag tag-fat">8g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 15u</div>
+          <div class="meal-name">Greek Yogurt</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">300g</span></li>
+          <li>Kaneel <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~190 kcal</span>
+          <span class="tag tag-pro">26g P</span>
+          <span class="tag tag-carb">18g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 18u30</div>
+          <div class="meal-name">Zalm & Aardappelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Zalm filet <span class="ing-amount">170g</span></li>
+          <li>Gekookte aardappelen <span class="ing-amount">250g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Olijfolie, citroen, dille <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~610 kcal</span>
+          <span class="tag tag-pro">44g P</span>
+          <span class="tag tag-carb">52g K</span>
+          <span class="tag tag-fat">22g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Protein Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Whey eiwit <span class="ing-amount">45g (1,5 scoops)</span></li>
+          <li>Water <span class="ing-amount">350ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~200 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">6g K</span>
+          <span class="tag tag-fat">3g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Vrijdag totaal:</strong> ~2,130 kcal · 200g P · 192g K · 52g V &nbsp;|&nbsp; Zalm bevat meer vet — dat zijn gezonde omega-3 vetten. Voeg 100g extra rijst toe bij de lunch voor meer calorieën.</div>
+</div>
+
+<!-- SATURDAY -->
+
+<div class="day-content" id="day-5">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 8u</div>
+          <div class="meal-name">Protein Havermout Pannenkoeken</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Havermeel (of gemalen havermout) <span class="ing-amount">80g</span></li>
+          <li>Hele eieren <span class="ing-amount">3 stuks (~150g)</span></li>
+          <li>Whey eiwit <span class="ing-amount">30g (1 scoop)</span></li>
+          <li>Bakpoeder & kaneel <span class="ing-amount">5g / naar smaak</span></li>
+          <li>Blauwe bessen (topping) <span class="ing-amount">80g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~510 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">54g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 13u</div>
+          <div class="meal-name">Gehakt Gevulde Zoete Aardappel</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Mager rundergehakt (5% vet) <span class="ing-amount">170g</span></li>
+          <li>Zoete aardappel (groot, gebakken) <span class="ing-amount">220g</span></li>
+          <li>Zwarte bonen (blik, gespoeld) <span class="ing-amount">80g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Komijn, knoflook, chilipeper <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~620 kcal</span>
+          <span class="tag tag-pro">48g P</span>
+          <span class="tag tag-carb">64g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 16u</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">300g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">100g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~210 kcal</span>
+          <span class="tag tag-pro">28g P</span>
+          <span class="tag tag-carb">22g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 19u</div>
+          <div class="meal-name">Gegrilde Kip & Geroosterde Aardappelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">230g</span></li>
+          <li>Kleine aardappelen (geroosterd) <span class="ing-amount">250g</span></li>
+          <li>Groene boontjes (geroosterd) <span class="ing-amount">150g</span></li>
+          <li>Olijfolie <span class="ing-amount">5ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~630 kcal</span>
+          <span class="tag tag-pro">56g P</span>
+          <span class="tag tag-carb">60g K</span>
+          <span class="tag tag-fat">12g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Casein Protein Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Casein eiwit <span class="ing-amount">45g (1,5 scoops)</span></li>
+          <li>Water <span class="ing-amount">350ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~200 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">6g K</span>
+          <span class="tag tag-fat">3g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Zaterdag totaal:</strong> ~2,170 kcal · 216g P · 206g K · 44g V &nbsp;|&nbsp; Weekend dag — vervang pannenkoeken door overnight oats (80g havermout + 300g yogurt + whey) als dat makkelijker is.</div>
+</div>
+
+<!-- SUNDAY -->
+
+<div class="day-content" id="day-6">
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Breakfast · 9u</div>
+          <div class="meal-name">Overnight Oats</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Havermout (droog) <span class="ing-amount">80g</span></li>
+          <li>Griekse yogurt 0% <span class="ing-amount">200g</span></li>
+          <li>Whey eiwit <span class="ing-amount">30g (1 scoop)</span></li>
+          <li>Halfvolle melk <span class="ing-amount">120ml</span></li>
+          <li>Banaan <span class="ing-amount">½ (~60g)</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~510 kcal</span>
+          <span class="tag tag-pro">46g P</span>
+          <span class="tag tag-carb">68g K</span>
+          <span class="tag tag-fat">6g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Lunch · 13u</div>
+          <div class="meal-name">Tonijn & Kidneybonen Bowl</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Tonijn in water (blik) <span class="ing-amount">2 blikken (~280g uitgelekt)</span></li>
+          <li>Kidneybonen (blik, gespoeld) <span class="ing-amount">120g</span></li>
+          <li>Gekookte aardappelen (blokjes) <span class="ing-amount">200g</span></li>
+          <li>Gestoomde wortelen <span class="ing-amount">80g</span></li>
+          <li>Olijfolie & citroen <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~590 kcal</span>
+          <span class="tag tag-pro">62g P</span>
+          <span class="tag tag-carb">52g K</span>
+          <span class="tag tag-fat">8g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">3</div>
+        <div>
+          <div class="meal-label">Snack · 16u</div>
+          <div class="meal-name">Greek Yogurt</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">250g</span></li>
+          <li>Honing <span class="ing-amount">5g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~180 kcal</span>
+          <span class="tag tag-pro">22g P</span>
+          <span class="tag tag-carb">24g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">4</div>
+        <div>
+          <div class="meal-label">Avondmaal · 18u30</div>
+          <div class="meal-name">Meal Prep: Kip & Zoete Aardappel</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (vanavond portie) <span class="ing-amount">280g</span></li>
+          <li>Zoete aardappel (gebakken) <span class="ing-amount">220g</span></li>
+          <li>Gestoomde broccoli <span class="ing-amount">150g</span></li>
+          <li>Groene boontjes <span class="ing-amount">100g</span></li>
+          <li>Olijfolie & kruiden <span class="ing-amount">5ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~670 kcal</span>
+          <span class="tag tag-pro">66g P</span>
+          <span class="tag tag-carb">60g K</span>
+          <span class="tag tag-fat">12g V</span>
+        </div>
+      </div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number">5</div>
+        <div>
+          <div class="meal-label">Avond · 21u</div>
+          <div class="meal-name">Casein Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Casein eiwit <span class="ing-amount">45g (1,5 scoops)</span></li>
+          <li>Water <span class="ing-amount">350ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~200 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">6g K</span>
+          <span class="tag tag-fat">3g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Zondag totaal:</strong> ~2,150 kcal · 238g P · 210g K · 30g V &nbsp;|&nbsp; 🍳 Meal prep tip: Bak vanavond 600–800g kipfilet + 1kg zoete aardappelen + 1kg aardappelen in de oven — klaar voor maandag & dinsdag!</div>
+</div>
+
+<script>
+  function showDay(index) {
+    document.querySelectorAll('.day-content').forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+    });
+    document.querySelectorAll('.day-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+    });
+  }
+</script>
+
+</body>
+</html>
