@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/x-icon" href="icon.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Recomp Meal Plan — IF Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+  --bg: #0d0d0d;
+  --card: #161616;
+  --accent: #c8f55a;
+  --accent2: #7ed4f7;
+  --text: #f0f0f0;
+  --muted: #888;
+  --border: #2a2a2a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #0d0d0d;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding: 32px 20px 60px;
+}
+
+header { text-align: center; margin-bottom: 40px; }
+
+header h1 {
+font-family: 'Bebas Neue', sans-serif;
+font-size: clamp(52px, 12vw, 96px);
+letter-spacing: 4px;
+line-height: 0.9;
+color: var(--accent);
+}
+
+header p {
+color: var(--muted);
+font-size: 13px;
+letter-spacing: 3px;
+text-transform: uppercase;
+margin-top: 10px;
+}
+
+.macros-bar {
+display: flex;
+justify-content: center;
+gap: 12px;
+margin-bottom: 32px;
+flex-wrap: wrap;
+}
+
+.macro-pill {
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 100px;
+padding: 10px 22px;
+font-size: 13px;
+font-weight: 500;
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+
+.macro-pill span {
+font-family: 'Bebas Neue', sans-serif;
+font-size: 20px;
+display: block;
+letter-spacing: 2px;
+}
+
+.macro-pill.cal span { color: var(--accent); }
+.macro-pill.pro span { color: #f7a85e; }
+.macro-pill.carb span { color: var(--accent2); }
+.macro-pill.fat span { color: #d97ef7; }
+
+.shopping-strip {
+max-width: 1100px;
+margin: 0 auto 36px;
+background: #111;
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 14px 20px;
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+align-items: center;
+}
+
+.shopping-strip .label {
+font-size: 10px;
+text-transform: uppercase;
+letter-spacing: 2px;
+color: var(--muted);
+margin-right: 4px;
+width: 100%;
+}
+
+.shop-tag {
+background: #1a1a1a;
+border: 1px solid #333;
+border-radius: 6px;
+padding: 4px 12px;
+font-size: 12px;
+color: #ddd;
+font-weight: 500;
+}
+
+.day-nav {
+display: flex;
+justify-content: center;
+gap: 6px;
+margin-bottom: 32px;
+flex-wrap: wrap;
+}
+
+.day-btn {
+background: var(--card);
+border: 1px solid var(--border);
+color: var(--muted);
+font-family: 'DM Sans', sans-serif;
+font-size: 12px;
+letter-spacing: 2px;
+text-transform: uppercase;
+padding: 8px 16px;
+border-radius: 6px;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.day-btn:hover, .day-btn.active {
+background: var(--accent);
+color: #000;
+border-color: var(--accent);
+font-weight: 600;
+}
+
+.day-content { display: none; }
+.day-content.active { display: block; }
+
+.meals-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 16px;
+max-width: 1100px;
+margin: 0 auto;
+}
+
+.meal-card {
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 16px;
+overflow: hidden;
+transition: transform 0.2s, border-color 0.2s;
+}
+
+.meal-card:hover {
+transform: translateY(-3px);
+border-color: #333;
+}
+
+.meal-header {
+padding: 14px 18px 10px;
+border-bottom: 1px solid var(--border);
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.meal-number {
+font-family: 'Bebas Neue', sans-serif;
+font-size: 28px;
+color: var(--accent);
+line-height: 1;
+min-width: 28px;
+}
+
+.meal-label {
+font-size: 10px;
+text-transform: uppercase;
+letter-spacing: 2px;
+color: var(--muted);
+}
+
+.meal-name {
+font-size: 15px;
+font-weight: 600;
+line-height: 1.2;
+}
+
+.meal-body { padding: 14px 18px; }
+
+.ingredients {
+list-style: none;
+margin-bottom: 14px;
+}
+
+.ingredients li {
+font-size: 13px;
+color: #ccc;
+padding: 4px 0;
+border-bottom: 1px solid #1f1f1f;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.ingredients li:last-child { border-bottom: none; }
+
+.ing-amount {
+color: var(--muted);
+font-size: 12px;
+white-space: nowrap;
+margin-left: 8px;
+}
+
+.meal-macros {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+}
+
+.tag {
+font-size: 11px;
+padding: 3px 9px;
+border-radius: 100px;
+font-weight: 500;
+}
+
+.tag-cal { background: #1e2a10; color: var(--accent); }
+.tag-pro { background: #2a1e10; color: #f7a85e; }
+.tag-carb { background: #102028; color: var(--accent2); }
+.tag-fat { background: #20102a; color: #d97ef7; }
+
+.note {
+max-width: 1100px;
+margin: 28px auto 0;
+background: var(--card);
+border: 1px solid var(--border);
+border-left: 3px solid var(--accent);
+border-radius: 10px;
+padding: 14px 18px;
+font-size: 13px;
+color: var(--muted);
+line-height: 1.7;
+}
+
+.note strong { color: var(--text); }
+
+.progress-wrap {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #242424;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+.meal-card.current-meal {
+  border-color: var(--accent);
+  box-shadow: 0 0 18px rgba(200, 245, 90, 0.22);
+}
+
+.update-btn {
+  display: block;
+  margin: 0 auto 24px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.year-tracker {
+  max-width: 1100px;
+  margin: 36px auto 0;
+  background: transparent;
+}
+
+.year-tracker h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--accent);
+  font-size: 34px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.month-block {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--card);
+}
+
+.month-title {
+  font-size: 11px;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 8px);
+  gap: 5px;
+}
+
+.day-square {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #333;
+  border: none;
+}
+
+.day-square.future {
+  background: #333;
+  opacity: 0.45;
+}
+
+.day-square.none {
+  background: #8b1e1e;
+}
+
+.day-square.partial {
+  background: #b56a16;
+}
+
+.day-square.complete {
+  background: #7ed321;
+}
+
+.day-square.today {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tracker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 700px) {
+  .tracker-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  .tracker-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.macro-pill.cal span {
+  color: var(--accent);
+}
+
+.macro-pill.pro span {
+  color: #f7a85e;
+}
+
+.macro-pill.carb span {
+  color: var(--accent2);
+}
+
+.macro-pill.fat span {
+  color: #d97ef7;
+}
+
+.day-btn {
+  background: #1f1f24;
+  border: 1px solid #333;
+  color: var(--accent2);
+  box-shadow: 0 0 0 transparent;
+}
+
+.day-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(200, 245, 90, 0.28);
+}
+
+.day-btn:hover {
+  background: #2b2b30;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 20% 30%, rgba(200,245,90,0.08), transparent 40%),
+              radial-gradient(circle at 80% 70%, rgba(126,212,247,0.08), transparent 40%);
+  animation: moveBg 12s ease-in-out infinite alternate;
+}
+
+@keyframes moveBg {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  100% {
+    transform: translate(-20px, 20px) scale(1.05);
+  }
+}
+
+
+/* IF layout additions */
+.window-bar {
+  max-width: 700px;
+  margin: 0 auto 36px;
+  background: #111;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.window-item { text-align: center; }
+
+.window-item .time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.window-item .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.window-divider {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: #333;
+  letter-spacing: 2px;
+}
+
+.meal-card.big { border-color: #2e2e2e; }
+
+.meal-number.snack-num {
+  color: var(--accent2);
+  font-size: 22px;
+}
+
+.meal-label.snack-label {
+  color: var(--accent2);
+  opacity: 0.8;
+}
+
+.section-label {
+  max-width: 1100px;
+  margin: 0 auto 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--muted);
+  padding-left: 2px;
+}
+
+.section-label.snack {
+  color: var(--accent2);
+  margin-top: 24px;
+}
+
+.section-label.meal2 { margin-top: 24px; }
+
+</style>
+
+</head>
+<body>
+<header>
+  <h1>SHRED<br>PROTOCOL</h1>
+  <p>Intermittent Fasting · 13:00–22:00 · Body Recomp</p>
+  <button class="update-btn" onclick="forceUpdate()">Update App</button>
+</header>
+<div class="macros-bar">
+  <div class="macro-pill cal"><span>2,400-2,500</span>Calories / Day</div>
+  <div class="macro-pill pro"><span>~200-220g</span>Protein</div>
+  <div class="macro-pill carb"><span>~200-220g</span>Carbs</div>
+  <div class="macro-pill fat"><span>~65-75g</span>Fats</div>
+</div>
+
+<div class="window-bar">
+  <div class="window-item">
+    <div class="time">VASTEN</div>
+    <div class="label">Tot 13:00</div>
+  </div>
+  <div class="window-divider">→</div>
+  <div class="window-item">
+    <div class="time">13:00</div>
+    <div class="label">Maaltijd 1 (groot)</div>
+  </div>
+  <div class="window-divider">→</div>
+  <div class="window-item">
+    <div class="time">17:00</div>
+    <div class="label">Snack</div>
+  </div>
+  <div class="window-divider">→</div>
+  <div class="window-item">
+    <div class="time">20:00</div>
+    <div class="label">Maaltijd 2 (groot)</div>
+  </div>
+  <div class="window-divider">→</div>
+  <div class="window-item">
+    <div class="time">VASTEN</div>
+    <div class="label">Vanaf 22:00</div>
+  </div>
+</div>
+
+<div class="day-nav">
+  <button class="day-btn active" onclick="showDay(0)">Mon</button>
+  <button class="day-btn" onclick="showDay(1)">Tue</button>
+  <button class="day-btn" onclick="showDay(2)">Wed</button>
+  <button class="day-btn" onclick="showDay(3)">Thu</button>
+  <button class="day-btn" onclick="showDay(4)">Fri</button>
+  <button class="day-btn" onclick="showDay(5)">Sat</button>
+  <button class="day-btn" onclick="showDay(6)">Sun</button>
+</div>
+
+<!-- MONDAY -->
+
+<div class="day-content active" id="day-0">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Kip, Zoete Aardappel & Broccoli</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">300g</span></li>
+          <li>Zoete aardappel (gebakken) <span class="ing-amount">300g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie <span class="ing-amount">10ml</span></li>
+          <li>Knoflookpoeder, paprika, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~800 kcal</span>
+          <span class="tag tag-pro">72g P</span>
+          <span class="tag tag-carb">64g K</span>
+          <span class="tag tag-fat">16g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">400g</span></li>
+          <li>Honing <span class="ing-amount">10g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">150g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~310 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">30g K</span>
+          <span class="tag tag-fat">2g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00</div>
+          <div class="meal-name">Rundergehakt, Rijst & Groene Boontjes</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Mager rundergehakt (5% vet) <span class="ing-amount">300g</span></li>
+          <li>Witte rijst (gekookt) <span class="ing-amount">200g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie <span class="ing-amount">10ml</span></li>
+          <li>Komijn, knoflook, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~840 kcal</span>
+          <span class="tag tag-pro">68g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">22g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Maandag totaal:</strong> ~1,950 kcal · 182g P · 166g K · 40g V &nbsp;|&nbsp; Voeg 100g extra rijst of een proteïne shake toe om op 2,400 kcal te komen. Protein shake = +200 kcal / +42g P.</div>
+</div>
+
+<!-- TUESDAY -->
+
+<div class="day-content" id="day-1">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Tonijn, Aardappelen & Broccoli</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Tonijn in water (blik) <span class="ing-amount">2 blikken (~280g)</span></li>
+          <li>Gekookte aardappelen <span class="ing-amount">350g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie & citroensap <span class="ing-amount">10ml / naar smaak</span></li>
+          <li>Zout, peper, knoflook <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~780 kcal</span>
+          <span class="tag tag-pro">72g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt & Proteïne Shake</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">300g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">150g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~230 kcal</span>
+          <span class="tag tag-pro">30g P</span>
+          <span class="tag tag-carb">24g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00</div>
+          <div class="meal-name">Tilapia, Zoete Aardappel & Groene Boontjes</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Tilapia filets <span class="ing-amount">350g</span></li>
+          <li>Zoete aardappel (gebakken) <span class="ing-amount">280g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie, citroen, kruiden <span class="ing-amount">10ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~760 kcal</span>
+          <span class="tag tag-pro">70g P</span>
+          <span class="tag tag-carb">66g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Dinsdag totaal:</strong> ~1,770 kcal · 172g P · 162g K · 29g V &nbsp;|&nbsp; Voeg een proteïne shake toe (45g whey/casein + water) om op ~2,000 kcal te komen, of vergroot de portie aardappelen.</div>
+</div>
+
+<!-- WEDNESDAY -->
+
+<div class="day-content" id="day-2">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Kip, Zwarte Bonen & Rijst</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">300g</span></li>
+          <li>Zwarte bonen (blik, gespoeld) <span class="ing-amount">150g</span></li>
+          <li>Bruine rijst (gekookt) <span class="ing-amount">200g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">150g</span></li>
+          <li>Limoen, komijn, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~860 kcal</span>
+          <span class="tag tag-pro">76g P</span>
+          <span class="tag tag-carb">88g K</span>
+          <span class="tag tag-fat">12g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">400g</span></li>
+          <li>Honing <span class="ing-amount">10g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">150g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~310 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">30g K</span>
+          <span class="tag tag-fat">2g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00</div>
+          <div class="meal-name">Garnalen, Aardappelen & Groenten</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Garnalen (gepeld) <span class="ing-amount">350g</span></li>
+          <li>Kleine aardappelen (gekookt) <span class="ing-amount">300g</span></li>
+          <li>Groene boontjes <span class="ing-amount">150g</span></li>
+          <li>Wortelen (gesneden) <span class="ing-amount">100g</span></li>
+          <li>Olijfolie, knoflook, soja (weinig zout) <span class="ing-amount">10ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~720 kcal</span>
+          <span class="tag tag-pro">64g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Woensdag totaal:</strong> ~1,890 kcal · 182g P · 190g K · 28g V &nbsp;|&nbsp; Goede trainingsdag — hoge koolhydraten. Voeg een proteïne shake toe voor meer calorieën en eiwitten.</div>
+</div>
+
+<!-- THURSDAY -->
+
+<div class="day-content" id="day-3">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Rundergehakt, Zoete Aardappel & Broccoli</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Mager rundergehakt (5% vet) <span class="ing-amount">300g</span></li>
+          <li>Zoete aardappel (gepureerd) <span class="ing-amount">300g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie <span class="ing-amount">10ml</span></li>
+          <li>Paprika, knoflook, zout <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~840 kcal</span>
+          <span class="tag tag-pro">68g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">22g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">400g</span></li>
+          <li>Honing <span class="ing-amount">5g</span></li>
+          <li>Kaneel <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~280 kcal</span>
+          <span class="tag tag-pro">40g P</span>
+          <span class="tag tag-carb">26g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00</div>
+          <div class="meal-name">Kip, Witte Bonen & Groene Boontjes</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gebakken) <span class="ing-amount">300g</span></li>
+          <li>Witte bonen (blik, gespoeld) <span class="ing-amount">150g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie, rozemarijn, knoflook <span class="ing-amount">10ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~740 kcal</span>
+          <span class="tag tag-pro">74g P</span>
+          <span class="tag tag-carb">46g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Donderdag totaal:</strong> ~1,860 kcal · 182g P · 144g K · 37g V &nbsp;|&nbsp; Lagere koolhydratendag. Voeg 150g rijst toe aan maaltijd 2 en een proteïne shake voor de calorieën.</div>
+</div>
+
+<!-- FRIDAY -->
+
+<div class="day-content" id="day-4">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Kip & Rijst Bowl met Groenten</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">300g</span></li>
+          <li>Witte rijst (gekookt) <span class="ing-amount">250g</span></li>
+          <li>Wortelen (gestoomd) <span class="ing-amount">120g</span></li>
+          <li>Groene boontjes (gestoomd) <span class="ing-amount">120g</span></li>
+          <li>Sojasaus (weinig zout) <span class="ing-amount">15ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~820 kcal</span>
+          <span class="tag tag-pro">70g P</span>
+          <span class="tag tag-carb">88g K</span>
+          <span class="tag tag-fat">10g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">300g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">150g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~220 kcal</span>
+          <span class="tag tag-pro">28g P</span>
+          <span class="tag tag-carb">24g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00</div>
+          <div class="meal-name">Zalm, Aardappelen & Broccoli</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Zalm filet <span class="ing-amount">250g</span></li>
+          <li>Gekookte aardappelen <span class="ing-amount">300g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie, citroen, dille <span class="ing-amount">10ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~820 kcal</span>
+          <span class="tag tag-pro">56g P</span>
+          <span class="tag tag-carb">64g K</span>
+          <span class="tag tag-fat">30g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Vrijdag totaal:</strong> ~1,860 kcal · 154g P · 176g K · 41g V &nbsp;|&nbsp; Zalm is vetter — gezonde omega-3. Voeg een proteïne shake toe voor extra eiwitten en calorieën.</div>
+</div>
+
+<!-- SATURDAY -->
+
+<div class="day-content" id="day-5">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Rundergehakt Gevulde Zoete Aardappel</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Mager rundergehakt (5% vet) <span class="ing-amount">250g</span></li>
+          <li>Zoete aardappel (groot, gebakken) <span class="ing-amount">300g</span></li>
+          <li>Zwarte bonen (blik, gespoeld) <span class="ing-amount">100g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">150g</span></li>
+          <li>Komijn, knoflook, chilipeper <span class="ing-amount">naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~830 kcal</span>
+          <span class="tag tag-pro">66g P</span>
+          <span class="tag tag-carb">80g K</span>
+          <span class="tag tag-fat">18g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt & Wortelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">400g</span></li>
+          <li>Honing <span class="ing-amount">10g</span></li>
+          <li>Wortelen (rauw) <span class="ing-amount">150g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~310 kcal</span>
+          <span class="tag tag-pro">42g P</span>
+          <span class="tag tag-carb">30g K</span>
+          <span class="tag tag-fat">2g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00</div>
+          <div class="meal-name">Gegrilde Kip, Aardappelen & Groene Boontjes</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (gegrild) <span class="ing-amount">300g</span></li>
+          <li>Kleine aardappelen (geroosterd) <span class="ing-amount">300g</span></li>
+          <li>Groene boontjes (geroosterd) <span class="ing-amount">200g</span></li>
+          <li>Olijfolie <span class="ing-amount">10ml</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~790 kcal</span>
+          <span class="tag tag-pro">70g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Zaterdag totaal:</strong> ~1,930 kcal · 178g P · 182g K · 34g V &nbsp;|&nbsp; Weekend dag. Voeg een proteïne shake toe — casein 's avonds is ideaal voor herstel tijdens de slaap.</div>
+</div>
+
+<!-- SUNDAY -->
+
+<div class="day-content" id="day-6">
+  <div class="section-label">Maaltijd 1 · 13:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">1</div>
+        <div>
+          <div class="meal-label">Maaltijd 1 · 13:00</div>
+          <div class="meal-name">Tonijn, Kidneybonen & Aardappelen</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Tonijn in water (blik) <span class="ing-amount">2 blikken (~280g)</span></li>
+          <li>Kidneybonen (blik, gespoeld) <span class="ing-amount">150g</span></li>
+          <li>Gekookte aardappelen (blokjes) <span class="ing-amount">250g</span></li>
+          <li>Wortelen (gestoomd) <span class="ing-amount">100g</span></li>
+          <li>Olijfolie & citroen <span class="ing-amount">10ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~800 kcal</span>
+          <span class="tag tag-pro">74g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">12g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label snack">Snack · 17:00</div>
+  <div class="meals-grid">
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-number snack-num">S</div>
+        <div>
+          <div class="meal-label snack-label">Snack · 17:00</div>
+          <div class="meal-name">Greek Yogurt</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Griekse yogurt 0% <span class="ing-amount">400g</span></li>
+          <li>Honing <span class="ing-amount">10g</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~290 kcal</span>
+          <span class="tag tag-pro">40g P</span>
+          <span class="tag tag-carb">28g K</span>
+          <span class="tag tag-fat">1g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label meal2">Maaltijd 2 · 20:00</div>
+  <div class="meals-grid">
+    <div class="meal-card big">
+      <div class="meal-header">
+        <div class="meal-number">2</div>
+        <div>
+          <div class="meal-label">Maaltijd 2 · 20:00 · Meal Prep</div>
+          <div class="meal-name">Kip, Zoete Aardappel & Groenten</div>
+        </div>
+      </div>
+      <div class="meal-body">
+        <ul class="ingredients">
+          <li>Kipfilet (batch gekookt) <span class="ing-amount">350g (vanavond)</span></li>
+          <li>Zoete aardappel (gebakken) <span class="ing-amount">280g</span></li>
+          <li>Broccoli (gestoomd) <span class="ing-amount">150g</span></li>
+          <li>Groene boontjes <span class="ing-amount">150g</span></li>
+          <li>Olijfolie & kruiden <span class="ing-amount">10ml / naar smaak</span></li>
+        </ul>
+        <div class="meal-macros">
+          <span class="tag tag-cal">~860 kcal</span>
+          <span class="tag tag-pro">80g P</span>
+          <span class="tag tag-carb">72g K</span>
+          <span class="tag tag-fat">14g V</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Zondag totaal:</strong> ~1,950 kcal · 194g P · 172g K · 27g V &nbsp;|&nbsp; 🍳 Meal prep: Bak vanavond 800g-1kg kipfilet + 1kg zoete aardappelen + 1kg aardappelen — klaar voor maandag & dinsdag!</div>
+</div>
+
+<script>
+  function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function showDay(index) {
+    document.querySelectorAll('.day-content').forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+    });
+
+    document.querySelectorAll('.day-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+    });
+
+    updateProgress();
+    highlightCurrentMeal();
+  }
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const todayIndex = (today.getDay() + 6) % 7;
+  const todayDate = getLocalDateString(today);
+  const planVersion = 'if-v1';
+
+  const savedYear = localStorage.getItem('mealPlanYear');
+  if (savedYear !== String(currentYear)) {
+    Object.keys(localStorage).forEach(key => {
+      if (
+        key.startsWith('meal-') ||
+        key.startsWith('mealIF-') ||
+        key.startsWith('mealHistory-') ||
+        key.startsWith('mealHistoryIF-') ||
+        key === 'mealPlanDate' ||
+        key === 'mealPlanYear'
+      ) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    localStorage.setItem('mealPlanYear', String(currentYear));
+  }
+
+  const savedDate = localStorage.getItem('mealPlanDate');
+  if (savedDate !== todayDate) {
+    localStorage.setItem('mealPlanDate', todayDate);
+  }
+
+  const progressWrap = document.createElement('div');
+  progressWrap.className = 'progress-wrap';
+  progressWrap.innerHTML = `
+    <div class="progress-text">0/5 meals completed</div>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  `;
+
+  document.querySelector('.day-nav').after(progressWrap);
+
+  document.querySelectorAll('.meal-card').forEach((card, index) => {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'meal-check';
+
+    const id = `mealIF-${planVersion}-${todayDate}-${index}`;
+    checkbox.checked = localStorage.getItem(id) === 'true';
+
+    checkbox.addEventListener('change', () => {
+      localStorage.setItem(id, checkbox.checked);
+      updateProgress();
+      highlightCurrentMeal();
+      saveTodayHistory();
+      buildYearTracker();
+    });
+
+    card.querySelector('.meal-header').appendChild(checkbox);
+  });
+
+  function getActiveMealCards() {
+    const activeDay = document.querySelector('.day-content.active');
+    return Array.from(activeDay.querySelectorAll('.meal-card'));
+  }
+
+  function updateProgress() {
+    const cards = getActiveMealCards();
+    const checked = cards.filter(card => card.querySelector('.meal-check')?.checked).length;
+    const total = cards.length;
+    const percent = total ? (checked / total) * 100 : 0;
+
+    document.querySelector('.progress-text').textContent = `${checked}/${total} meals completed`;
+    document.querySelector('.progress-fill').style.width = `${percent}%`;
+  }
+
+  function highlightCurrentMeal() {
+    document.querySelectorAll('.meal-card').forEach(card => {
+      card.classList.remove('current-meal');
+    });
+
+    const cards = getActiveMealCards();
+    const nextMeal = cards.find(card => !card.querySelector('.meal-check')?.checked);
+
+    if (nextMeal) {
+      nextMeal.classList.add('current-meal');
+    }
+  }
+
+  function saveTodayHistory() {
+    const cards = getActiveMealCards();
+    const checked = cards.filter(card => card.querySelector('.meal-check')?.checked).length;
+    const total = cards.length;
+
+    let status = 'none';
+
+    if (checked === total && total > 0) {
+      status = 'complete';
+    } else if (checked > 0) {
+      status = 'partial';
+    }
+
+    localStorage.setItem(`mealHistoryIF-${planVersion}-${todayDate}`, status);
+  }
+
+  function buildYearTracker() {
+    let tracker = document.querySelector('.year-tracker');
+
+    if (!tracker) {
+      tracker = document.createElement('div');
+      tracker.className = 'year-tracker';
+      document.body.appendChild(tracker);
+    }
+
+    tracker.innerHTML = `<h2>${currentYear} Tracker</h2><div class="tracker-grid"></div>`;
+    const trackerGrid = tracker.querySelector('.tracker-grid');
+
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const startMonth = today.getMonth();
+
+    for (let month = startMonth; month < 12; month++) {
+      const monthBlock = document.createElement('div');
+      monthBlock.className = 'month-block';
+
+      const title = document.createElement('div');
+      title.className = 'month-title';
+      title.textContent = monthNames[month];
+
+      const grid = document.createElement('div');
+      grid.className = 'days-grid';
+
+      const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, month, day);
+        const dateString = getLocalDateString(date);
+
+        const square = document.createElement('div');
+        square.className = 'day-square';
+
+        if (dateString === todayDate) {
+          square.classList.add('today');
+        }
+
+        if (date > today) {
+          square.classList.add('future');
+        } else {
+          const status = localStorage.getItem(`mealHistoryIF-${planVersion}-${dateString}`) || 'none';
+          square.classList.add(status);
+        }
+
+        square.title = dateString;
+        grid.appendChild(square);
+      }
+
+      monthBlock.appendChild(title);
+      monthBlock.appendChild(grid);
+      trackerGrid.appendChild(monthBlock);
+    }
+  }
+
+  function forceUpdate() {
+    window.location.href = window.location.pathname + '?v=' + Date.now();
+  }
+
+  setInterval(() => {
+    const nowDate = getLocalDateString(new Date());
+
+    if (nowDate !== localStorage.getItem('mealPlanDate')) {
+      location.reload();
+    }
+  }, 60000);
+
+  showDay(todayIndex);
+  saveTodayHistory();
+  buildYearTracker();
+</script>
+</body>
+</html>
